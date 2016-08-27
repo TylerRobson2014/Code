@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  width: 960px;
+  height: 500px;
+  position: relative;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}
+
+path.slice{
+  stroke-width:2px;
+}
+
+polyline{
+  opacity: .3;
+  stroke: black;
+  stroke-width: 2px;
+  fill: none;
+}
+
+.chart .legend {
+  fill: black;
+  font: 14px sans-serif;
+  text-anchor: start;
+  font-size: 12px;
+}
+
+.chart text {
+  fill: white;
+  font: 10px sans-serif;
+  text-anchor: end;
+}
+
+.chart .label {
+  fill: black;
+  font: 14px sans-serif;
+  text-anchor: end;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+</style>
+<body>
+<input type="file" id="csv-file" name="files"/>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+
+var Barsvg = d3.select("body")
+  .append("svg")
+  .append("g")
+
+var Piesvg = d3.select("body")
+  .append("svg")
+  .append("g")
+
+Piesvg.append("g")
+  .attr("class", "slices");
+Piesvg.append("g")
+  .attr("class", "labels");
+Piesvg.append("g")
+  .attr("class", "lines");
+
+var width = 960,
+    height = 450,
+    radius = Math.min(width, height) / 2;
+
+var pie = d3.layout.pie()
+  .sort(null)
+  .value(function(d) {
+    return d.value;
+  });
+
+var arc = d3.svg.arc()
+  .outerRadius(radius * 0.8)
+  .innerRadius(radius * 0.4);
+
+var outerArc = d3.svg.arc()
+  .innerRadius(radius * 0.9)
+  .outerRadius(radius * 0.9);
+
+Piesvg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var key = function(d){ return d.data.label; };
+
+var color = d3.scale.ordinal()
+  .domain(["Critical","High","Medium"])
+  .range(['#ff0000','#ff9200','#ffff00']);
+
+function type(d) {
+  d.count = +d.count;
+  return d;
+}
+
+$("#csv-file").change(handleFileSelect);
+
+function handleFileSelect(evt) {
+  var file = evt.target.files[0];
+  console.log(file);
+
+
+d3.csv(file.name,type,function(error, data) {
+  if (error) throw error;
+
+  console.log(data.length);
+
+  var Ccount=0;
+  var Hcount=0;
+  var Mcount=0;
+  var Lcount=0;
+  var Icount=0;
+
+  for (var i = 0, len = data.length; i < len; i++) {
+    if (data[i].Risk == "Critical"){Ccount = Ccount + 1;}
+    if (data[i].Risk == "High"){Hcount = Hcount + 1;}
+    if (data[i].Risk == "Medium"){Mcount = Mcount + 1;}
+    if (data[i].Risk == "Low"){Lcount = Lcount + 1;}
+    if (data[i].Risk == "None"){Icount = Icount + 1;}
+  }
+
+  var total = Ccount + Hcount + Mcount;
+
+  var criticalPercent = (Ccount / total) * 100
+  var highPercent = (Hcount / total) * 100
+  var mediumPercent = (Mcount / total) * 100
+
+  console.log(Ccount,Hcount,Mcount);
+
+  var Piearray = [{label: "Critical", value: criticalPercent},{label: "High", value: highPercent}, {label: "Medium", value: mediumPercent}];
+  console.log(Piearray);
+
+  var Bararray = [{label: "Critical", value: Ccount},{label: "High", value: Hcount},{label: "Medium", value: Mcount},{label: "Low", value: Lcount},{label: "Information", value: Icount}];
+  console.log(Bararray);
+
+
+pieChart(Piearray);
+
+barChart(Bararray)
+
+});
+};
+
+function barChart(mydata) {
+
+var data = {
+  labels: [
+    'All Hosts'
+  ],
+  series: [
+    {
+      label: 'Critical',
+      values: [mydata[0].value]
+    },
+    {
+      label: 'High',
+      values: [mydata[1].value]
+    },
+    {
+      label: 'Medium',
+      values: [mydata[2].value]
+    },
+    {
+      label: 'Low',
+      values: [mydata[3].value]
+    },
+    {
+      label: 'Informational',
+      values: [mydata[4].value]
+    }]
+};
+
+var chartWidth       = 300,
+    barHeight        = 20,
+    groupHeight      = barHeight * data.series.length,
+    gapBetweenGroups = 10,
+    spaceForLabels   = 150,
+    spaceForLegend   = 150;
+
+// Zip the series data together (first values, second values, etc.)
+var zippedData = [];
+for (var i=0; i<data.labels.length; i++) {
+  for (var j=0; j<data.series.length; j++) {
+    zippedData.push(data.series[j].values[i]);
+  }
+}
+
+// Color scale
+var color = d3.scale.category20();
+var chartHeight = barHeight * zippedData.length + gapBetweenGroups * data.labels.length;
+
+var x = d3.scale.linear()
+    .domain([0, d3.max(zippedData)])
+    .range([0, chartWidth]);
+
+var y = d3.scale.linear()
+    .range([chartHeight + gapBetweenGroups, 0]);
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .tickFormat('')
+    .tickSize(0)
+    .orient("left");
+
+// Specify the chart area and dimensions
+var chart = d3.select("Barsvg")
+    .attr("width", spaceForLabels + chartWidth + spaceForLegend)
+    .attr("height", chartHeight);
+
+// Create bars
+var bar = chart.selectAll("g")
+    .data(zippedData)
+    .enter().append("g")
+    .attr("transform", function(d, i) {
+      return "translate(" + spaceForLabels + "," + (i * barHeight + gapBetweenGroups * (0.5 + Math.floor(i/data.series.length))) + ")";
+    });
+
+// Create rectangles of the correct width
+bar.append("rect")
+    .attr("fill", function(d,i) { return color(i % data.series.length); })
+    .attr("class", "bar")
+    .attr("width", x)
+    .attr("height", barHeight - 1);
+
+// Add text label in bar
+bar.append("text")
+    .attr("x", function(d) { return x(d) - 3; })
+    .attr("y", barHeight / 2)
+    .attr("fill", "red")
+    .attr("dy", ".35em")
+    .text(function(d) { return d; });
+
+// Draw labels
+bar.append("text")
+    .attr("class", "label")
+    .attr("x", function(d) { return - 10; })
+    .attr("y", groupHeight / 2)
+    .attr("dy", ".35em")
+    .text(function(d,i) {
+      if (i % data.series.length === 0)
+        return data.labels[Math.floor(i/data.series.length)];
+      else
+        return ""});
+
+chart.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + spaceForLabels + ", " + -gapBetweenGroups/2 + ")")
+      .call(yAxis);
+
+// Draw legend
+var legendRectSize = 18,
+    legendSpacing  = 4;
+
+var legend = chart.selectAll('.legend')
+    .data(data.series)
+    .enter()
+    .append('g')
+    .attr('transform', function (d, i) {
+        var height = legendRectSize + legendSpacing;
+        var offset = -gapBetweenGroups/2;
+        var horz = spaceForLabels + chartWidth + 40 - legendRectSize;
+        var vert = i * height - offset;
+        return 'translate(' + horz + ',' + vert + ')';
+    });
+
+legend.append('rect')
+    .attr('width', legendRectSize)
+    .attr('height', legendRectSize)
+    .style('fill', function (d, i) { return color(i); })
+    .style('stroke', function (d, i) { return color(i); });
+
+legend.append('text')
+    .attr('class', 'legend')
+    .attr('x', legendRectSize + legendSpacing)
+    .attr('y', legendRectSize - legendSpacing)
+    .text(function (d) { return d.label; });
+
+}
+
+
+
+
+function pieChart(data) {
+
+  /* ------- PIE SLICES -------*/
+  var slice = Piesvg.select(".slices").selectAll("path.slice")
+    .data(pie(data), key);
+
+  slice.enter()
+    .insert("path")
+    .style("fill", function(d) { return color(d.data.label); })
+    .attr("class", "slice");
+
+  slice   
+    .transition().duration(1000)
+    .attrTween("d", function(d) {
+      this._current = this._current || d;
+      var interpolate = d3.interpolate(this._current, d);
+      this._current = interpolate(0);
+      return function(t) {
+        return arc(interpolate(t));
+      };
+    })
+
+  slice.exit()
+    .remove();
+
+  /* ------- TEXT LABELS -------*/
+
+  var text = Piesvg.select(".labels").selectAll("text")
+    .data(pie(data), key);
+
+  text.enter()
+    .append("text")
+    .attr("dy", ".35em")
+    .text(function(d) {
+      return d.data.label;
+    });
+  
+  function midAngle(d){
+    return d.startAngle + (d.endAngle - d.startAngle)/2;
+  }
+
+  text.transition().duration(1000)
+    .attrTween("transform", function(d) {
+      this._current = this._current || d;
+      var interpolate = d3.interpolate(this._current, d);
+      this._current = interpolate(0);
+      return function(t) {
+        var d2 = interpolate(t);
+        var pos = outerArc.centroid(d2);
+        pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
+        return "translate("+ pos +")";
+      };
+    })
+    .styleTween("text-anchor", function(d){
+      this._current = this._current || d;
+      var interpolate = d3.interpolate(this._current, d);
+      this._current = interpolate(0);
+      return function(t) {
+        var d2 = interpolate(t);
+        return midAngle(d2) < Math.PI ? "start":"end";
+      };
+    });
+
+  text.exit()
+    .remove();
+
+  /* ------- SLICE TO TEXT POLYLINES -------*/
+
+  var polyline = Piesvg.select(".lines").selectAll("polyline")
+    .data(pie(data), key);
+  
+  polyline.enter()
+    .append("polyline");
+
+  polyline.transition().duration(1000)
+    .attrTween("points", function(d){
+      this._current = this._current || d;
+      var interpolate = d3.interpolate(this._current, d);
+      this._current = interpolate(0);
+      return function(t) {
+        var d2 = interpolate(t);
+        var pos = outerArc.centroid(d2);
+        pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
+        return [arc.centroid(d2), outerArc.centroid(d2), pos];
+      };      
+    });
+  
+  polyline.exit()
+    .remove();
+};
+});
+</script>
+</body>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script>
+
+var svgContainer = d3.select("body").append("svg")
+                                     .attr("width", 200)
+                                     .attr("height", 200);
+ 
+ //Draw the Circle
+var circle = svgContainer.append("circle")
+                       .attr("cx", 100)
+                       .attr("cy", 100)
+                       .attr("r", 100)
+                       .attr("fill","green");
+
+ var line = svgContainer.append("line")
+                         .attr("x1", 100)
+                         .attr("y1", 100)
+                         .attr("x2", 50)
+                         .attr("y2", 50)
+                         .attr("stroke-width", 2)
+                         .attr("stroke", "black")
+                         .style('text-anchor', 'start');
+
+line.transition().duration(5000)
+    .attrTween("transform", rotTween);
+
+function rotTween() {
+    var i = d3.interpolate(0, 360);
+    return function(t) {
+        return "rotate(" + i(t) + ",100,100)";};}
+
+
+</script>
+
+
+<div id="container"></div>
+
+</body>

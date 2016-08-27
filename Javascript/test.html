@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="uft-8">
+</head>
+<body>
+
+<h1>Simple Fractal</h1>
+
+<form>
+Select depth (between 1 and 5):
+<input type="number" id="quantity" min="1" max="5" oninput="draw()">
+</form>
+
+<canvas id="myCanvas" width="1000" height="1000" style="border:1px solid #c3c3c3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+
+//document.write(quantity);
+
+function square(side,x,y){
+
+ctx.fillStyle = "#FF0000";
+ctx.fillRect(x-side/2, y-side/2, side, side);
+};
+
+function foom(depth,side,x,y){
+var i;
+var j;
+    if (depth == 1){
+        square(side,x,y)
+	}else{
+        for (i = 0; i < 3;i++){
+            for (j = 0; j < 3;j++){
+                foom(depth-1,side/3,x-side*(i-1),y+side*(j-1));
+			}
+		}			
+        square(side,x,y);
+		}
+};
+
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+
+function draw() {
+var i = 1;
+var countIter = document.getElementById("quantity").value;
+
+ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+
+while (i <= countIter){
+if ((countIter) == 1) {
+foom(1,200,400,400);
+}else{
+foom(i,200,400,400);
+}
+++i;
+}
+};
+
+</script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+<meta charset="uft-8">
+
+
+</head>
+<body>
+
+<h1>Project plan</h1>
+<div>
+<form id = "projectDates">
+  Select a project start week:
+  <input type="date" id="projStart" oninput="addStart('projStart')">
+  Select a project end week:
+  <input type="date" id="projEnd" oninput="addEnd('projEnd')">
+</form>
+</div>
+
+<p id="startD"></p> <p id="endD"></p>
+
+
+<script>
+var existStartDate = localStorage.getItem("projStart");
+var existEndDate = localStorage.getItem("projEnd");
+document.getElementById("startD").innerHTML = existStartDate;
+document.getElementById("endD").innerHTML = existEndDate;
+
+
+//
+var projectStartDate=document.getElementById("projStart");
+projectStartDate.value = existStartDate;
+
+//
+
+</script>
+
+<p>
+<p>
+
+<div id = "dvData">
+
+    <input type="button" value="Clear All" onclick="clearDB('dataTable')">
+ 
+    <input type="button" value="Add Row" onclick="addRow('dataTable')">
+ 
+    <input type="button" value="Delete Row" onclick="deleteRow('dataTable')">
+
+    <input type="button" value="Confim" onclick="updateDB('dataTable')">
+
+
+<p>
+<p>
+ 
+    <table id="dataTable" width="350px" border="1">
+        <tbody>
+           <tr>
+            <th></th>
+            <th></th>
+            <th>Email address</th>
+            <th>Role</th>
+           </tr>
+           <tr>
+            <td><input type="checkbox" name="chk"></td>
+            <td> 1 </td>
+            <td> <input type="text"> </td>
+            <td> <input type="text"> </td>
+           </tr>
+    </tbody></table>
+
+</div>
+
+
+<div>
+
+<p>
+<p>
+
+<input type="button" value="Draw Gantt" onclick="drawGantt()">
+<input type="button" value="Clear Gantt" onclick="clearAll()">
+
+<p>
+<p>
+
+<input type="button" value="New Task" onclick="newTask('tasks')">
+<input type="button" value="Delete Task" onclick="deleteTask('tasks')">
+
+</div>
+
+<div>
+
+<div id='d2' style="position:absolute; left:0px">
+ 
+    <table id="tasks" width="200px" border="1">
+        <tbody>
+           <tr>
+            <th></th>
+            <th>Start</th>
+            <th>End</th>
+           </tr>
+           <tr>
+            <td><input type="checkbox" name="chk"></td>
+            <td><input type="date" id = "sdate" oninput="taskStart('sdate')"> </td>
+            <td><input type="date" id = "edate" oninput="taskEnd('edate')"> </td>
+           </tr>
+    </tbody></table>
+
+</div>
+
+<script>
+
+function taskStart(startd){
+
+
+var numberTasks = 0;
+var numberEntries = localStorage.length;
+
+for (i = 0; i < numberEntries; i++){
+var keyValue = localStorage.key(i);
+if (keyValue.indexOf("taskstart") > -1){
+numberTasks++;
+}
+}
+var startDate = document.getElementById(startd).value;
+var increment = numberTasks + 1;
+localStorage.setItem("taskstart"+increment,startDate);
+
+};
+
+
+function taskEnd(endd){
+
+var numberTasks = 0;
+var numberEntries = localStorage.length;
+
+for (i = 0; i < numberEntries; i++){
+var keyValue = localStorage.key(i);
+if (keyValue.indexOf("taskend") > -1){
+numberTasks++;
+}
+}
+
+var endDate = document.getElementById(endd).value;
+var increment = numberTasks + 1;
+localStorage.setItem("taskend"+increment,endDate);
+
+};
+
+</script>
+
+<div id='d1' style="position:absolute; left:350px">  
+<canvas id="myCanvas" width="1000" height="1000" style="border:1px solid #c3c3c3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+</div>
+
+<script>
+
+function newTask(tableID){
+
+var table=document.getElementById(tableID);
+var rowCount=table.rows.length;
+var row=table.insertRow(rowCount);
+var cell0=row.insertCell(0);
+var element0=document.createElement("input");
+element0.type="checkbox";
+element0.name="chk"+rowCount;
+cell0.appendChild(element0);    
+var cell1=row.insertCell(1);
+var element1=document.createElement("input");
+element1.type="date";
+element1.id="sdate"+rowCount;
+element1.oninput = function(){
+taskStart(element1.id);
+};
+cell1.appendChild(element1);
+var cell2=row.insertCell(2);
+var element2=document.createElement("input");
+element2.type="date";
+element2.id="edate"+rowCount;
+element2.oninput = function(){
+taskEnd(element2.id);
+};
+cell2.appendChild(element2);
+
+}
+
+function deleteTask(tableID){
+try{
+var table=document.getElementById(tableID);
+var rowCount=table.rows.length;
+for(var i=0;i<rowCount;i++){
+var row=table.rows[i];
+var chkbox=row.cells[0].childNodes[0];
+if(null!=chkbox&&true==chkbox.checked){
+table.deleteRow(i);
+rowCount--;
+i--;
+}
+}
+}
+catch(e){
+alert(e);
+}
+
+}
+
+
+function addStart(start){
+var startDate = document.getElementById(start).value;
+localStorage.setItem(start,startDate);
+document.getElementById("startD").innerHTML = startDate;
+};
+
+function addEnd(end){
+var endDate = document.getElementById(end).value;
+localStorage.setItem(end,endDate);
+document.getElementById("endD").innerHTML = endDate;
+};
+
+function addRow(tableID){
+var table=document.getElementById(tableID);
+var rowCount=table.rows.length;
+var row=table.insertRow(rowCount);
+var cell1=row.insertCell(0);
+var element1=document.createElement("input");
+element1.type="checkbox";
+element1.name="chkbox[]";
+cell1.appendChild(element1);
+var cell2=row.insertCell(1);
+cell2.innerHTML=rowCount;
+var cell3=row.insertCell(2);
+var element2=document.createElement("input");
+element2.type="text";
+element2.name="txtbox"+"1";
+cell3.appendChild(element2);
+var cell4=row.insertCell(3);
+var element3=document.createElement("input");
+element3.type="text";
+element3.name="txtbox[]";
+cell4.appendChild(element3);
+
+}
+
+function clearDB(){
+
+localStorage.clear();
+
+}
+
+
+function updateDB(tableID){
+
+    //gets table
+
+    var oTable = document.getElementById(tableID);
+
+    //gets rows of table
+    var rowLength = oTable.rows.length;
+    var cellVal = [];
+
+    //loops through rows    
+    for (i = 1; i < rowLength; i++){
+
+      //gets cells of current row  
+       var oCells = oTable.rows[i].cells;
+
+       //gets amount of cells of current row
+       var cellLength = oCells.length;
+
+       //loops through each cell in current row
+ //      for(var j = 0; j < cellLength; j++){
+
+              // get your cell info here
+
+       cellVal[i] = oCells[2].children[0].value;
+       localStorage.setItem("email"+i,cellVal[i]);
+       cellVal[i] = oCells[3].children[0].value;
+       localStorage.setItem("Role"+i,cellVal[i]);
+
+ //          }
+   }
+
+}
+
+function deleteRow(tableID){
+try{
+var table=document.getElementById(tableID);
+var rowCount=table.rows.length;
+for(var i=0;i<rowCount;i++){
+var row=table.rows[i];
+var chkbox=row.cells[0].childNodes[0];
+if(null!=chkbox&&true==chkbox.checked){
+table.deleteRow(i);
+rowCount--;
+i--;
+}
+}
+}
+catch(e){
+alert(e);
+}
+} 
+
+function drawGrid(gap){
+
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+for (i = 0; i < gap+1; i++){
+ctx.beginPath();
+ctx.moveTo((500/gap)*i+50,0);
+ctx.lineWidth = "2";
+ctx.strokeStyle = "blue";
+ctx.lineTo((500/gap)*i+50,500);
+ctx.stroke();
+}
+};
+
+
+function drawGantt(){
+
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+var sDate = localStorage.getItem("projStart");
+var eDate = localStorage.getItem("projEnd");
+var gap = getDays(sDate,eDate);
+
+drawGrid(gap);
+
+// Blue rectangle
+
+
+var numberTasks = 0;
+var numberEntries = localStorage.length;
+var keyValue;
+var taskDays;
+var i;
+for (i = 0; i < numberEntries; i++){
+keyValue = localStorage.key(i);
+if (keyValue.indexOf("taskstart") > -1){
+numberTasks++;
+}
+}
+
+var j = 1;
+var start;
+var end;
+var k;
+var keySearch;
+var foundStart = 0;
+var foundEnd = 0;
+
+for (k = 0; k < numberEntries; k++){
+
+foundStart = 0;
+foundEnd = 0;
+
+for (i = 0; i < numberEntries; i++){
+keyValue = localStorage.key(i);
+
+keySearch = "taskstart"+j;
+if (keyValue.indexOf(keySearch) > -1){
+start = localStorage.getItem(keyValue);
+foundStart = 1;
+}
+
+keySearch = "taskend"+j;
+if (keyValue.indexOf(keySearch) > -1){
+end = localStorage.getItem(keyValue);
+foundEnd = 1;
+}
+
+}
+
+if (foundStart && foundEnd){
+taskDays = getDays(start,end);
+taskLength = taskDays;
+diffFromStart = getDays(sDate,start);
+
+ctx.beginPath();
+ctx.moveTo(50+(diffFromStart/gap)*500,50*j);
+ctx.lineWidth = "20";
+ctx.strokeStyle = "blue";
+ctx.lineTo(50+parseInt(((diffFromStart+taskLength)/gap)*500),50*j);
+ctx.stroke();
+}
+
+j++;
+
+}
+
+};
+
+function clearAll() {
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+
+};
+
+function getDays(startDate,endDate) {
+
+var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
+var firstDate = new Date(startDate);
+var secondDate = new Date(endDate);
+
+var diffDays = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay)));
+
+return diffDays;
+};
+
+</script>
+</body>
+</html>

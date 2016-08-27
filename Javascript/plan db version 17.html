@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+
+<meta charset=uft-8>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+</head>
+
+
+<body>
+
+<h1>Dummy test only</h1>
+
+<div id = "dvData">
+
+    <input type="button" id = "gob" value="button" onclick="dumbB(100)">
+    <input type="button" id = "gob" value="button" onclick="dumbC(300)">
+ 
+</div>
+
+<script>
+
+var versiondb = 1;
+var existStartDate = 55;
+var db;
+var much;
+var myObject = {};
+var err;
+
+********************
+
+table=document.getElementById(tableID);
+rowCount=table.rows.length;
+row=table.insertRow(rowCount);
+
+element0=document.createElement("input");
+element0.type="checkbox";
+element0.name="chk"+rowCount;
+cell0=row.insertCell(0);
+cell0.appendChild(element0);
+
+element1=document.createElement("input");    
+element1.type="text";
+element1.id=name;
+cell1=row.insertCell(1);
+cell1.appendChild(element1);
+
+element2=document.createElement("input");    
+element2.type="date";
+element2.id="start_"+name;
+element2.oninput = function(){
+task(name,element1.id,element2.id);
+};
+cell2=row.insertCell(2);
+cell2.appendChild(element2);
+
+element3=document.createElement("input");
+element3.type="date";
+element3.id="end_"+name;
+element3.oninput = function(){
+task(name,element1.id,element3.id);
+};
+cell3=row.insertCell(3);
+cell3.appendChild(element3);
+
+
+********************
+
+document.addEventListener("DOMContentLoaded",function(){
+deleteAll();
+//dumbA();
+//dumbB();
+
+
+var openRequest = indexedDB.open("TEST",versiondb);
+
+openRequest.onupgradeneeded = function(event){
+console.log("running onupgradeneed");
+var thisDB = event.target.result;
+if(!thisDB.objectStoreNames.contains("Shout")){
+console.log("creating project");
+var store = thisDB.createObjectStore('Shout',{keyPath: 'a',autoIncrement: false});
+}
+}
+
+openRequest.onsuccess = function(event){
+console.log("Success- worked");
+console.log("working DB");
+db = event.target.result;
+console.log(db);
+console.log(existStartDate);
+//
+dumbB(300);
+dumbC(300,function(err,myObject)
+{
+if (!err){
+	alert(myObject.b);
+} else {alert("error");}
+}
+);
+alert("hi");
+}
+
+});
+
+function dumbB(val){
+
+var task = {
+a: val,
+b: 2,
+}
+
+
+var transaction = db.transaction(['Shout'],"readwrite");
+var store = transaction.objectStore('Shout');
+existStartDate = val;
+var putrequest = store.put(task);
+console.log("close");
+};
+
+function dumbC(name,callback){
+
+var transaction = db.transaction(['Shout'],"readwrite");
+var store = transaction.objectStore('Shout');
+var request = store.get(name);
+request.onsuccess = function (event) {
+if (request.result){
+var error = 0;
+callback(error,request.result);
+//return callback(request.result);
+} else {
+	error = 1;
+	callback(error,request.result);
+}
+};
+}
+
+function buttonName(){
+
+	return 20;
+}
+
+
+function deleteAll(){
+console.log("Entering delete");
+
+var req = indexedDB.deleteDatabase("TEST");
+req.onsuccess = function () {
+    console.log("Deleted database successfully");
+};
+req.onerror = function () {
+    console.log("Couldn't delete database");
+};
+req.onblocked = function () {
+    console.log("Couldn't delete database due to the operation being blocked");
+};
+};
+
+</script>
+</body>
+</html>

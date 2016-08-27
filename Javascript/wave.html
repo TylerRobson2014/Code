@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+
+<meta charset=uft-8>
+<link href='http://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+</head>
+
+<body>
+
+<div>
+
+<canvas id="myCanvas" width="410" height="410"></canvas>
+
+</div>
+
+<script>
+
+var i = 0;
+var j;
+var k;
+var colors = [];
+colors[0] = "Red";
+colors[1] = "Orange";
+colors[2] = "Yellow";
+colors[3] = "Green";
+colors[4] = "Blue";
+colors[5] = "Purple";
+colors[6] = "Indigo";
+var clockTick = 0;
+
+var globalCanvas = document.getElementById('myCanvas');
+var canvasW = globalCanvas.width;
+var canvasH = globalCanvas.height;
+multiplier = 10;
+numberXpoints = canvasW/multiplier;
+numberYpoints = canvasH/multiplier;
+
+var field = [];
+
+for (j = 0; j < numberXpoints; j++){
+
+  field[j] = [];
+
+  for (k = 0; k < numberYpoints; k++){
+
+    field[j][k] = colors[3];
+
+  }
+
+}
+
+mainLoop();
+
+function mainLoop(){
+  window.setTimeout(mainLoop,20);
+  drawScreen(clockTick);
+  clockTick = clockTick + 1;
+}
+
+function drawScreen(tick){
+
+  var canvas = document.getElementById('myCanvas');
+  var context = canvas.getContext('2d');
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  //drawCircle(context,25,25,5);
+  drawField(context,tick);
+
+}
+
+
+function drawField(context,tick){
+  var pointCol = "Green";
+  var c = tick%7
+  console.log(c);
+  for (var m = 1; m < numberXpoints; m++){
+    for (var n = 1; n < numberYpoints; n++){
+      context.beginPath();
+      context.arc(m*multiplier, n*multiplier, 0.1*multiplier, 0, 2 * Math.PI, false);
+      if (m == 10 && n == 10){
+        context.fillStyle = colors[c];
+      }else{
+        context.fillStyle = "Green";
+      }
+      context.fill();
+      context.lineWidth = 0.1;
+      context.strokeStyle = '#003300';
+      context.stroke();
+      context.closePath();
+    }
+  }
+}
+
+
+</script>
+      
+</body>
+
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+
+<meta charset=uft-8>
+<link href='http://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+<style>
+
+/***FIRST STYLE THE BUTTON***/
+input[type=button]{
+cursor:pointer; /*forces the cursor to change to a hand when the button is hovered*/
+padding:1px 5px; /*add some padding to the inside of the button*/
+background:Grey; /*the colour of the button*/
+border:1px solid Grey; /*required or the default border for the browser will appear*/
+/*give the button curved corners, alter the size as required*/
+-moz-border-radius: 5px;
+-webkit-border-radius: 5px;
+border-radius: 5px;
+/*give the button a drop shadow*/
+-webkit-box-shadow: 0 0 4px rgba(0,0,0, .75);
+-moz-box-shadow: 0 0 4px rgba(0,0,0, .75);
+box-shadow: 0 0 4px rgba(0,0,0, .75);
+/*style the text*/
+color:#f3f3f3;
+font-size:0.8em;
+}
+/***NOW STYLE THE BUTTON'S HOVER AND FOCUS STATES***/
+input[type=button]:hover, input[type=button]:focus{
+background-color :Black; /*make the background a little darker*/
+/*reduce the drop shadow size to give a pushed button effect*/
+-webkit-box-shadow: 0 0 1px rgba(0,0,0, .75);
+-moz-box-shadow: 0 0 1px rgba(0,0,0, .75);
+box-shadow: 0 0 1px rgba(0,0,0, .75);
+}
+
+table, td, th {
+    border: 0px solid green;
+}
+
+th {
+    background-color: green;
+    color: white;
+}
+
+:-moz-placeholder {
+    color: Gray;
+}
+ 
+::-webkit-input-placeholder {
+    color: Gray;
+}
+
+
+input[type=button]{
+    height:25px; 
+    width:100px; 
+    padding:5px 8px;
+}
+
+input[type=date]{ 
+    border:0px solid #aaa;
+    height:22px;
+    border-radius:2px;
+}
+input[type=text]{ 
+    border:0px solid #aaa;
+    height:22px;
+    border-radius:2px;
+}
+
+input:focus:invalid, textarea:focus:invalid { /* when a field is considered invalid by the browser */
+    box-shadow: 0 0 5px #d45252;
+    border:3px solid #aaa;
+    border-color: Red;
+}
+
+
+input:valid, textarea:valid { /* when a field is considered valid by the browser */
+    box-shadow: 0 0 5px #5cd053;
+    border-color: Green;
+}
+
+h1 {
+    color: Blue;
+    font-family: 'Indie Flower', cursive;
+}
+
+.deleteButton {
+    color: Red;
+}
+
+ul.listTasks{ list-style:none; }
+ul.listTasks li{
+	width:250px;
+	height:200px;
+	padding:20px;
+	margin:20px;
+	float:left;
+	-moz-box-shadow:5px 5px 7px rgba(33,33,33,1);  
+  -webkit-box-shadow: 5px 5px 7px rgba(33,33,33,.7);  
+  box-shadow: 5px 5px 7px rgba(33,33,33,.7); 
+  -webkit-transform:rotate(-6deg);  
+  -o-transform:rotate(-6deg);  
+  -moz-transform:rotate(-6deg);  
+  font-family: 'Short Stack', cursive;
+}
+
+ul.listTasks li:nth-child(odd){  
+  -o-transform:rotate(4deg);  
+  -webkit-transform:rotate(4deg);  
+  -moz-transform:rotate(4deg);  
+  position:relative;  
+  top:5px;  
+}  
+ul.listTasks li:nth-child(2n){  
+  -o-transform:rotate(-3deg);  
+  -webkit-transform:rotate(-3deg);  
+  -moz-transform:rotate(-3deg);  
+  position:relative;  
+  top:-5px;  
+}  
+ul.listTasks li:nth-child(6n){  
+  -o-transform:rotate(5deg);  
+  -webkit-transform:rotate(5deg);  
+  -moz-transform:rotate(5deg);  
+  position:relative;  
+  top:-10px;  
+}
+
+.yellow{ background:#ffc; }
+.green{	background:#cfc; }
+.blue { background:#ccf; }
+.red{ background:#f24a4a; }
+.purple{ background:#eaafe3; }
+.orange{ background:#f28e50; }
+
+</style>
+</head>
+
+<body>
+
+<h1>Project plan</h1>
+
+<div>
+<form id = "projectDates">
+  Select a project start date:
+  <input type="date" id="projStart"/>
+  Select a project end date:
+  <input type="date" id="projEnd"/>
+</form>
+</div>
+
+<p>
+<p>
+
+<div id = "doStuff">
+    <input type="button" id = "addTask" value="Add task">
+    <input type="button" id = "refreshTask" value="Refresh Tasks">
+</div>
+
+<p>
+<p>
+
+<table class="projectTasks" id="projectTasks">
+<tr><th>Start</th><th>End</th><th>Name</th><th></th></tr>
+<tr><td><input type="date" id="task-1_start" oninput="taskDate(id)"/></td><td><input type="date" id="task-1_end" oninput="taskDate(id)"/></td><td><input type="text"/></td><td><a class="deleteButton" id="delete-1" title="Delete Task">X</a></td></tr> 
+</table>
+
+
+<ul class="listTasks">
+
+</ul>
+
+<script>
+if (!window.indexedDB) {
+    window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
+}
+// define the global variables so that they are available to the other functions
+var versiondb = 2;
+var db;
+var numberTasks = 0;
+// wait for page to load
+$(document).ready(function(){
+
+// setup
+setUpDB(function(){
+
+	// we now do the prepop of the project dates.
+	initialPop();
+
+    $('.projectTasks').on('click', 'a', function (e) {
+        console.log('this is the click');
+        e.preventDefault();
+        deleteRow($(this));
+    });
+
+	$('#addTask').click(function(){
+		addTask(null);
+	});
+
+	$('#refreshTask').click(function(){
+		refreshTask();
+	});
+
+	$('#projStart').on('input',function(){
+		addProj('projStart','projEnd');
+	});
+	$('#projEnd').on('input',function(){
+		addProj('projStart','projEnd');
+	});
+
+});
+});
+
+function deleteRow(thisButton){
+	console.log("thisButton");
+	thisButton.parent().parent().remove();
+	console.log(thisButton.attr('id'));
+    var arr =[];
+    arr = thisButton.attr('id').split("-");
+    var name = "task"+"-"+arr[1];
+	removeRecord(name);
+}
+
+function refreshTask(thisButton){
+
+	var tableRows = $('#projectTasks tr');
+	
+	$('.listTasks li').remove();
+
+	$.each(tableRows,function(){
+		var task = $(this).find('input[id^="task"]').val();
+		console.log("task"+task)
+		if(task != undefined){
+			createTask(task);
+		}	
+	});
+
+}
+
+function createTask(task){
+	var header = '<h2>'+task+'</h2>';
+	
+	var colours = new Array();
+	colours[0] = 'green';
+	colours[1] = 'blue';
+	colours[2] = 'yellow';
+	colours[3] = 'red';
+	colours[4] = 'purple';
+	colours[5] = 'orange';
+	
+	
+	$('.listTasks').append('<li class="'+colours[randomFromTo(0,(colours.length - 1))]+'">'+header+'</li>');
+}
+
+function randomFromTo(from, to){
+    return Math.floor(Math.random() * (to - from + 1) + from);
+ }
+// Start of auto part
+
+
+function setUpDB(callback){
+
+var idbSupported = false;
+
+console.log("Entering setupDB");
+
+if("indexedDB" in window){
+idbSupported = true;
+console.log("IndexedDB is supported");
+}
+
+if (idbSupported){
+
+var openRequest = indexedDB.open("projectplan",versiondb);
+console.log("Checking for onupgrade");
+
+openRequest.onupgradeneeded = function(event){
+console.log("running onupgradeneed");
+var thisDB = event.target.result;
+if(!thisDB.objectStoreNames.contains("project")){
+console.log("creating project");
+var store = thisDB.createObjectStore('project',{keyPath: 'taskName',autoIncrement: false});
+}
+
+}
+
+openRequest.onsuccess = function(event){
+console.log("Success- worked");
+db = event.target.result;
+//console.log(db);
+// place the callback for what will be the initial prop of the project dates.
+callback();
+}
+
+openRequest.onerror = function(event){
+console.log("Error - it didnt work");
+console.dir(event);
+}
+
+}
+// end setup
+}
+
+function initialPop(){
+// we do the initial prop of the project date
+var existStartDate = "";
+var existEndDate = "";
+var projectStart = "";
+var found = false;
+document.getElementById("projectTasks").deleteRow(1);
+var transaction = db.transaction(['project'],"readwrite");
+var store = transaction.objectStore('project');
+store.openCursor().onsuccess = function(event) {
+    var cursor = event.target.result;
+    console.log(cursor);
+    if(cursor) {
+    	keyValue = cursor.value.taskName;
+        if (keyValue.indexOf("main") > -1){
+			var projectStartDate=document.getElementById("projStart");
+			var projectEndDate=document.getElementById("projEnd");
+			projectStartDate.value = cursor.value.taskStart;
+			projectEndDate.value = cursor.value.taskEnd;
+        } else {
+        	var arr =[];
+        	arr = keyValue.split("-");
+        	var nRows = arr[1];
+        	console.log("nRows from initial pop "+nRows);
+        	addTask(nRows);
+        	var startName = cursor.value.taskName+"_start";
+        	var endName = cursor.value.taskName+"_end";
+			var taskStartDate=document.getElementById(startName);
+			var taskEndDate=document.getElementById(endName);
+			console.log(taskStartDate);
+			taskStartDate.value = cursor.value.taskStart;
+			taskEndDate.value = cursor.value.taskEnd;
+			found = true;
+        }
+        cursor.continue();
+        }else{
+        	console.log("no match in IS");
+        }
+}
+}
+
+
+function getDB(name,callback2){
+var arr = [];
+var maxValue = 0;
+var keyValue;
+var keySearch;
+var valueStore;
+var k = 0;
+
+var n = 100;
+for (var j = 0; j < n; j++){
+    arr.push({});
+}
+
+var transaction = db.transaction(['project'],"readwrite");
+var store = transaction.objectStore('project');
+store.openCursor().onsuccess = function(event) {
+    var cursor = event.target.result;
+    var i = 0;
+    if(cursor) {
+    	keySearch = name;
+    	keyValue = cursor.value.taskName;
+    	console.log("looking for = "+keySearch);
+    	console.log("Looking in = "+keyValue);
+    	console.log("Result of search = "+keyValue.indexOf(keySearch))
+        if (keyValue.indexOf(keySearch) > -1){
+        	console.log("name = "+keyValue);
+        	arr[i] = cursor.value;
+        	i++;
+        	k = i;
+        }
+        cursor.continue();
+        }else{
+        	console.log(k);
+        	callback2(k,arr);
+        }
+}
+}
+
+
+function popDB(name, start, end){
+
+var task = {
+taskName: name,
+taskStart: start,
+taskEnd: end,
+taskComplete: 0,
+taskResource: ""}
+
+var transaction = db.transaction(['project'],"readwrite");
+var store = transaction.objectStore('project');
+var putrequest = store.put(task);
+};
+
+function addProj(start,end){
+
+var startDate = document.getElementById(start).value;
+var endDate = document.getElementById(end).value;
+if (!(endDate == "")){
+var projectDays = getDays(startDate,endDate);
+} else{ 
+var projectDays = 0;
+}
+console.log("Project dates **"+projectDays);
+console.log("Putting in MAIN **");
+popDB("main",startDate,endDate,function(){
+	console.log("populated ****");});
+};
+
+function addTask(nRows){
+
+	if (nRows==null) {
+	var numRows = $('#projectTasks tr').length;
+	console.log("numRows"+numRows);
+	$('#projectTasks').append('<tr><td><input type="date" id="task-'+numRows+'_start" oninput="taskDate(id)"/></td><td><input type="date" id="task-'+numRows+'_end" oninput="taskDate(id)"/></td><td><input type="text"/></td><td><a class="deleteButton" id="delete-'+numRows+'" title="Delete Task">X</a></td></tr>');
+} else {
+	console.log("nrows"+nRows);
+	$('#projectTasks').append('<tr><td><input type="date" id="task-'+nRows+'_start" oninput="taskDate(id)"/></td><td><input type="date" id="task-'+nRows+'_end" oninput="taskDate(id)"/></td><td><input type="text"/></td><td><a class="deleteButton" id="delete-'+nRows+'" title="Delete Task">X</a></td></tr>');
+
+}
+}
+
+function taskDate(identifier){
+var keyValue = identifier;
+arr = keyValue.split("_");
+var taskName = arr[0];
+var dateType = arr[1];
+var newID = taskName+"_start";
+var sdate = document.getElementById(newID).value;
+newID = taskName+"_end";
+var edate = document.getElementById(newID).value;
+console.log(sdate,edate,taskName,dateType);
+popDB(taskName, sdate, edate);
+};
+
+function removeRecord(name){
+
+	var transaction = db.transaction(['project'],"readwrite");
+	var store = transaction.objectStore('project').delete(name);
+	store.onsuccess = function(event) {
+  // It's gone!
+};
+}
+
+function getDays(startDate,endDate) {
+
+var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
+var firstDate = new Date(startDate);
+var secondDate = new Date(endDate);
+
+var diffDays = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))) + 1;
+
+return diffDays;
+};
+
+</script>
+</body>
+</html>

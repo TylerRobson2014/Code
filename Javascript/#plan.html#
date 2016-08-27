@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="uft-8">
+</head>
+<body>
+
+<h1>Project plan</h1>
+<div>
+<form>
+  Select a project start week:
+  <input type="week" name="week_year" oninput="addStart()">
+  Select a project end week:
+  <input type="week" name="week_year" oninput="addEnd()">
+</form>
+</div>
+
+<p>
+<p>
+
+<div>
+ 
+    <input type="button" value="Add Row" onclick="addRow('dataTable')">
+ 
+    <input type="button" value="Delete Row" onclick="deleteRow('dataTable')">
+ 
+    <table id="dataTable" width="350px" border="1">
+        <tbody>
+           <tr>
+            <th></th>
+            <th></th>
+            <th>Email address</th>
+            <th>Role</th>
+           </tr>
+           <tr>
+            <td><input type="checkbox" name="chk"></td>
+            <td> 1 </td>
+            <td> <input type="text"> </td>
+            <td> <input type="text"> </td>
+           </tr>
+    </tbody></table>
+
+</div>
+
+<div>
+var name = prompt("hello");
+</div>
+
+<canvas id="myCanvas" width="1000" height="1000" style="border:1px solid #c3c3c3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+
+//document.write(quantity);
+
+
+function addRow(tableID){
+var table=document.getElementById(tableID);
+var rowCount=table.rows.length;
+var row=table.insertRow(rowCount);
+var cell1=row.insertCell(0);
+var element1=document.createElement("input");
+element1.type="checkbox";
+element1.name="chkbox[]";
+cell1.appendChild(element1);
+var cell2=row.insertCell(1);
+cell2.innerHTML=rowCount;
+var cell3=row.insertCell(2);
+var element2=document.createElement("input");
+element2.type="text";
+element2.name="txtbox[]";
+cell3.appendChild(element2);
+var cell4=row.insertCell(3);
+var element3=document.createElement("input");
+element3.type="text";
+element3.name="txtbox[]";
+cell4.appendChild(element3);
+
+}
+
+function deleteRow(tableID){
+try{
+var table=document.getElementById(tableID);
+var rowCount=table.rows.length;
+for(var i=0;i<rowCount;i++){
+var row=table.rows[i];
+var chkbox=row.cells[0].childNodes[0];
+if(null!=chkbox&&true==chkbox.checked){
+table.deleteRow(i);
+rowCount--;
+i--;
+}
+}
+}
+catch(e){
+alert(e);
+}
+} 
+
+
+function square(side,x,y){
+
+ctx.fillStyle = "#FF0000";
+ctx.fillRect(x-side/2, y-side/2, side, side);
+};
+
+
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+
+function draw() {
+var i = 1;
+var countIter = document.getElementById("quantity").value;
+
+ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+
+};
+
+</script>
+</body>
+</html>

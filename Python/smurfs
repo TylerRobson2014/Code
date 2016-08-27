@@ -1,0 +1,22 @@
+from random import randint
+
+numberDays = 0
+lightSwicth = 1
+day = 1
+switch = []
+smurfs = [0]*100
+
+def selectSmurf():
+	numberSmurfs = 100
+	chosenSmurf = randint(1,numberSmurfs)
+	return chosenSmurf
+
+def updateMemory(chosenSmurf):
+	smurf[chosenSmurf] = 1
+	
+def setLightSwitch(day,chosenSmurf):
+	decission = decideWhatToDo()
+	if smurf[chosenSmurf] = 0:
+		switch[day] = (-1)**day
+	else:
+		[day] = switch[day-1] 

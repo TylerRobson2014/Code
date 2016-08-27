@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+<body>
+<p>Nessus</p>
+<br>
+<p id="object"></p>
+
+<script>
+
+var dat0;
+var dat1;
+var dat2;
+var dat3;
+
+$(document).ready(function() {
+
+
+//*********************************************************************
+// ----- Use D3
+//*********************************************************************
+
+
+//creates an array of arrays
+d3.text('/home/steve/Dropbox/MyCode/Javascript/data.csv', function(data){
+    dat0 = d3.csv.parseRows(data);
+    console.log(dat0);
+});
+
+//creates an array of objects
+d3.csv('/home/steve/Dropbox/MyCode/Javascript/data.csv', function(data){
+	dat1=data;
+	console.log(dat1);
+});
+
+
+
+//*********************************************************************
+// ----- Use jquery-CSV
+//*********************************************************************
+
+
+
+// array of arrays
+$.ajax({
+    type: "GET",
+    url: "/home/steve/Dropbox/MyCode/Javascript/data.csv",
+    dataType: "text",
+    success: function(data) { 
+        dat2 = $.csv.toArrays(data);
+    	console.log(dat2);
+}
+});
+
+
+
+// array of objects
+$.ajax({
+    type: "GET",
+    url: "/home/steve/Dropbox/MyCode/Javascript/data.csv",
+    dataType: "text",
+    success: function(data) {
+    	dat3 = $.csv.toObjects(data);
+    	console.log(dat3);
+    }
+});
+
+}); // end document ready
+
+</script>
+</body>
+</html>

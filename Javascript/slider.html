@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+
+<meta charset=uft-8>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+<style>
+
+body{
+  background:lightgreen;
+}
+.container{
+  background:green;
+  display: flex;
+  width: 500px;
+  height: 500px;
+  text:centre;
+}
+.slider{
+	width: 100%;
+	margin: 50% auto;
+}
+
+
+input#slider2{ 
+  width: 100%;
+  height: 25px;
+  background:
+    color: green;
+  border: 1px solid darkgreen;
+    radius: 10px;
+  margin: auto;
+  transition: all 0.3s;
+}
+
+   
+  input#slider2:hover {
+    background-color: lightgreen;
+  }
+    
+input#slider2{
+  width: 100%;
+  height: 20px;
+  background:
+    color: darkgreen;
+  border:
+    radius: 30px;
+  box-shadow: 0px 0px 3px darkgreen;
+  transition: all 0.5s ease;
+}
+ 
+#rangevalue {
+  text-align: center;
+  font:
+    family: 'Quantico', sans-serif;
+    size: 18px;
+  display: block;
+  margin: auto;
+  padding: 10px 0px; 
+  width: 100%;
+  color: black; 
+}
+.text{
+  background:blue;
+  display: flex;
+  width: 500px;
+  height: 150px;
+  text:centre;
+}
+#myText {
+  text-align: center;
+  font-size: 100%;
+  display: block;
+  margin: auto;
+  padding: 10px 0px; 
+  width: 100%;
+  color: red; 
+}
+
+
+
+</style>
+  
+</head>
+
+
+<body>
+
+<div class = "text">
+<p id = "myText"> Test </p>
+</div>
+
+<div class = "container">
+
+<div class = "slider">
+<input id="slider2" type ="range" min ="0" max="100" step ="2" value ="5" onchange="update(value)" />
+<output id="rangevalue">5</output>
+</div>
+</div>
+
+<script>
+
+
+
+function update(val){
+	var a = parseInt(val);
+$('#myText').css('font-size',a);
+rangevalue.value=val;
+}
+
+</script>
+</body>
+</html>

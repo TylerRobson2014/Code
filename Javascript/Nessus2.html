@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+<body>
+<p>Nessus plugins</p>
+<div id="NessusPlugins">
+    <table id="plugIns" border="1">
+    	<tr></tr>
+    </table>
+</div>
+<br>
+<p>Nessus Criticality</p>
+<div id="NessusCriticality">
+    <table id="Criticality" border="1">
+    	<tr></tr>
+    </table>
+</div>
+<br>
+<p>Installed Software</p>
+<div id="installedSoftware">
+    <table id="Software" border="1">
+    	<tr></tr>
+    </table>
+</div>
+
+<script>
+
+var dat0;
+var dat1;
+var dat2;
+var dat3;
+
+var nCritical;
+var nHigh;
+var nMedium;
+var nLow;
+var nNone;
+
+$(document).ready(function() {
+
+
+//*********************************************************************
+// ----- Use D3
+//*********************************************************************
+
+
+//creates an array of arrays
+d3.text('/home/steve/Dropbox/MyCode/Javascript/data.csv', function(data){
+    dat0 = d3.csv.parseRows(data);
+    //console.log(dat0);
+});
+
+//creates an array of objects
+d3.csv('/home/steve/Dropbox/MyCode/Javascript/data.csv', function(data){
+	dat1=data;
+	//console.log(dat1);
+	var pluginArray = [];
+	var risks = [];
+	nCritical = 0;
+	nHigh = 0;
+	nMedium = 0;
+	nLow = 0;
+	nNone = 0;
+	for (i=0;i<dat1.length;i++){
+		if (pluginArray.indexOf(dat1[i]["Plugin ID"]) < 0){ 
+		//document.getElementById("object").innerHTML = dat1[i].Description;
+			//$("#NessusPlugins ul").append('<li>'+dat1[i]["Plugin ID"]+' '+dat1[i]["Name"]+'</li>');
+			$('#NessusPlugins tr:last').after('<tr><td>'+dat1[i]["Plugin ID"]+'</td><td>'+dat1[i]["Name"]+'</td></tr>');
+			pluginArray.push(dat1[i]["Plugin ID"]);
+			if (dat1[i]["Plugin ID"] == 20811)
+				{
+					var outPut = dat1[i]['Plugin Output'];
+					//var patt = /'(\w+\s){3}(?=\[)'/;
+					//var patt = /[a-zA-Z0-9\.\[\s\]]+(?=]\s\w)\]/;
+					//var patt = /[a-zA-Z0-9\.\[\s\]\/]+(?=]\s\w)\]/;
+					//var patt = /[a-zA-Z0-9\.\[\s]+(?=]\s)\]/;
+					//var patt = /(\w+\s)+(?=:):/;
+					//var patt = /[a-zA-Z0-9\.\[\s]+(?=\[\w)/;
+					//var patt = /\[(.)+\]/;
+					//var patt = /\[(version\s\w+\.\w+\.\w+\.\w+)\]/;
+					//var patt = /\[(installed\s\w+\s\w+\/\w+\/\w+)\]/;
+					console.log(outPut.split('\n'));
+					var slice = 0;
+					for (var i=1; i < 10; i++){
+						var patt = /.+(?=\n)/;
+						var res = outPut.match(patt);
+						var sRes = res.toString()
+						console.log(sRes.length);
+						//console.log(outPut);
+						$('#installedSoftware tr:last').after('<tr><td>'+sRes+'</td></tr>');
+						outPut = outPut.slice(sRes.length+1,outPut.length);
+				}
+				}
+		//$("#NessusDescriptions ul").append('<li>'+dat1[i]["Description"]+'</li>');
+		}
+		switch (dat1[i].Risk)
+		{
+			case "Critical":
+				nCritical = nCritical + 1;
+				break;
+			case "High":
+				nHigh = nHigh + 1;
+				break;
+			case "Medium":
+				nMedium = nMedium + 1;
+				break;
+			case "Low":
+				nLow = nLow + 1;
+				break;
+			case "None":
+				nNone = nNone + 1;
+				break;
+		}
+		risks.push(dat1[i].Risk);
+	}
+	var c;
+	var myArrayNames = ["Critical","High","Medium","Low","None"];
+	var myArrayValues = [nCritical,nHigh,nMedium,nLow,nNone];
+	for (c in myArrayNames){
+		//$("#NessusCriticality ul").append('<li>'+myArrayNames[c]+' '+myArrayValues[c]+'</li>');
+		$('#NessusCriticality tr:last').after('<tr><td>'+myArrayNames[c]+'</td><td>'+myArrayValues[c]+'</td></tr>');
+	}
+	console.log(risks);
+
+
+});
+
+}); // end document ready
+
+</script>
+</body>
+</html>
